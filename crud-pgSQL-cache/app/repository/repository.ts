@@ -14,7 +14,7 @@ export async function getAllUser() {
   return users;
 }
 
-export async function getUser(id: number) {
+export async function getUser(id: Number) {
   const users = await db.query(sql`
     SELECT * FROM users
     WHERE id=${id}

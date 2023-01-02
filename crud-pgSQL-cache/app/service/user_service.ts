@@ -8,10 +8,13 @@ import {
   updateUser
 } from '../repository/repository'
 import { tedis } from '../connectors/redisconnector'
+import dotenv from 'dotenv'
 
 
 const router = express.Router()
 const cache = tedis;
+dotenv.config();
+const ttl = process.env.TTL; 
 
 router.post("/", async (req: Request, res: Response) => {
   const u = new User(req.body.num_item, req.body.nome_item);
@@ -26,13 +29,14 @@ router.post("/", async (req: Request, res: Response) => {
 router.get("/", async (req: Request, res: Response) => {
   try {
     if (await cache.exists("getAll")) {
+      console.log("cache")
       res.send(await cache.get("getAll"));
     } else {    
       const users: User[] = await getAllUser()
-      console.log(users)
-      await cache.setex("getAll", 5, "Users");
-      // await cache.expire("getAll", 60); 
       
+      await cache.setex("getAll", ttl, JSON.stringify(users));
+      
+      console.log("banco")
       res.send(users);
     }
 
@@ -47,13 +51,13 @@ router.get("/:id", async (req: Request, res: Response) => {
   console.log(indice)
   try {
     if (await cache.exists(indice)) {
+      console.log("cache")
       res.send(await cache.get(indice));
     } else {    
-       const user = await getUser(req.params.id)
-       console.log(user)
-       const cache_user = user.toString()
-       console.log(cache_user)
-       await cache.setex(indice, 15, "await user");
+       const user = await getUser(id)
+
+       await cache.setex(indice, ttl, JSON.stringify(user));
+       console.log("banco")
        res.send(user);
 });
 
