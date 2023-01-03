@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-import { start_routers } from './app/app'
+import { start_routers } from './src/app'
 
 
 /* Start Server */
