@@ -14,7 +14,7 @@ import dotenv from 'dotenv'
 const router = express.Router()
 const cache = tedis;
 dotenv.config();
-const ttl = process.env.TTL; 
+const ttl = process.env.TTL;
 
 router.post("/", async (req: Request, res: Response) => {
   const u = new User(req.body.num_item, req.body.nome_item);
@@ -31,11 +31,11 @@ router.get("/", async (req: Request, res: Response) => {
     if (await cache.exists("getAll")) {
       console.log("cache")
       res.send(await cache.get("getAll"));
-    } else {    
+    } else {
       const users: User[] = await getAllUser()
-      
+
       await cache.setex("getAll", ttl, JSON.stringify(users));
-      
+
       console.log("banco")
       res.send(users);
     }
@@ -53,13 +53,13 @@ router.get("/:id", async (req: Request, res: Response) => {
     if (await cache.exists(indice)) {
       console.log("cache")
       res.send(await cache.get(indice));
-    } else {    
-       const user = await getUser(id)
+    } else {
+      const user = await getUser(id)
 
-       await cache.setex(indice, ttl, JSON.stringify(user));
-       console.log("banco")
-       res.send(user);
-});
+      await cache.setex(indice, ttl, JSON.stringify(user));
+      console.log("banco")
+      res.send(user);
+    });
 
 router.delete("/:id", async (req: Request, res: Response) => {
   await deleteUser(req.params.id);

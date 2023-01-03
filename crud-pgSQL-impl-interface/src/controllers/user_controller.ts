@@ -1,7 +1,7 @@
 import express, { Request, Response } from 'express';
 import { User } from '../schemas/User';
 import { UserServiceImpl } from '../service/impl/user_service_impl';
-
+import { UserService } from '../service/user_service';
 
 const router = express.Router()
 
@@ -9,7 +9,7 @@ router.post("/", async (req: Request, res: Response) => {
     try {
         const user = new User(req.body.num_item, req.body.nome_item);
 
-        const cUser = new UserServiceImpl()
+        const cUser: UserService = new UserServiceImpl()
 
         await cUser.createUser(user);
 
@@ -21,7 +21,7 @@ router.post("/", async (req: Request, res: Response) => {
 
 router.get("/", async (req: Request, res: Response) => {
     try {
-        const cUser = new UserServiceImpl();
+        const cUser: UserService = new UserServiceImpl();
 
         const getUsers = await cUser.getAllUsers();
 
@@ -34,7 +34,7 @@ router.get("/", async (req: Request, res: Response) => {
 router.get("/:id", async (req: Request, res: Response) => {
     const id = req.params.id
     try {
-        const cUser = new UserServiceImpl();
+        const cUser: UserService = new UserServiceImpl();
 
         const getUser = await cUser.getUser(id);
 
@@ -50,7 +50,7 @@ router.get("/:id", async (req: Request, res: Response) => {
 router.delete("/:id", async (req: Request, res: Response) => {
     const id = req.params.id
     try {
-        const cUser = new UserServiceImpl();
+        const cUser: UserService = new UserServiceImpl();
 
         await cUser.delUser(id)
 
@@ -66,7 +66,7 @@ router.put("/:id", async (req: Request, res: Response) => {
     const user = new User(req.body.num_item, req.body.nome_item);
     
     try {
-        const cUser = new UserServiceImpl();
+        const cUser: UserService = new UserServiceImpl();
 
         await cUser.changeUser(id, user);
 
