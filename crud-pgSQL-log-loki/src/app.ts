@@ -1,6 +1,6 @@
 import express, { Express } from 'express';
-import user from './controllers/user_controller'
 import prometheus from './utils/prometheus'
+import user from './controllers/user_controllerts'
 
 /* Start Server */
 export async function start_routers() {

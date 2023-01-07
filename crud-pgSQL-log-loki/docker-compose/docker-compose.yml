@@ -4,16 +4,16 @@ volumes:
   grafana_data: {}
   
 services:
-  crud:
-    build:
-      context: ../
-      dockerfile: Dockerfile
-    volumes:
-      - ./src:/home/node/app/src
-      - ./nodemon.json:/home/node/app/nodemon.json
-    expose:
-      - "3001"
-    # command: npm start  
+  # crud:
+  #   build:
+  #     context: ../
+  #     dockerfile: Dockerfile
+  #   volumes:
+  #     - ./src:/home/node/app/src
+  #     - ./nodemon.json:/home/node/app/nodemon.json
+  #   expose:
+  #     - "3001"
+  #   # command: npm start  
   
   loki:
     image: grafana/loki:latest
