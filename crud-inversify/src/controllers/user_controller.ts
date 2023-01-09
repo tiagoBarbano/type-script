@@ -69,6 +69,7 @@ export class UserController implements interfaces.Controller {
         @request() req: Request,
         @response() res: Response,
         @next() next: express.NextFunction): Promise<void | User> {
+        const start = Date.now();
         try {
             const cUser: UserService = new UserServiceImpl();
 
@@ -80,6 +81,9 @@ export class UserController implements interfaces.Controller {
 
         } catch (error) {
             res.status(400).send("Error to find the Users: " + error);
+        } finally {
+            const responseTimeInMs = Date.now() - start;
+            httpRequestTimer.labels(req.method, req.route.path, res.statusCode.toString()).observe(responseTimeInMs);
         }
     }
 
@@ -88,6 +92,7 @@ export class UserController implements interfaces.Controller {
         @request() req: Request,
         @response() res: Response,
         @next() next: express.NextFunction): Promise<void> {
+        const start = Date.now();            
         try {
             const cUser: UserService = new UserServiceImpl();
 
@@ -97,6 +102,9 @@ export class UserController implements interfaces.Controller {
 
         } catch (error) {
             res.status(400).send("Error to delete the User: " + error);
+        } finally {
+            const responseTimeInMs = Date.now() - start;
+            httpRequestTimer.labels(req.method, req.route.path, res.statusCode.toString()).observe(responseTimeInMs);
         }
     }
 
@@ -105,6 +113,7 @@ export class UserController implements interfaces.Controller {
         @request() req: Request,
         @response() res: Response,
         @next() next: express.NextFunction): Promise<void> {
+        const start = Date.now();            
         const user = new User(req.body.num_item, req.body.nome_item);
 
         try {
@@ -116,6 +125,9 @@ export class UserController implements interfaces.Controller {
 
         } catch (error) {
             res.status(400).send("Error to delete the User: " + error);
+        } finally {
+            const responseTimeInMs = Date.now() - start;
+            httpRequestTimer.labels(req.method, req.route.path, res.statusCode.toString()).observe(responseTimeInMs);
         }
     }
 
