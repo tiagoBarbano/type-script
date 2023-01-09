@@ -5,3 +5,5 @@ node_modules
 */*/dist
 */*/node_modules
 apoio
+zipkin
+opentelemetry

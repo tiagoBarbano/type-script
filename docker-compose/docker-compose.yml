@@ -1,0 +1,161 @@
+version: "3.9"
+
+volumes:
+  grafana_data: {}
+  postgres: {}
+  tempo-data: {}
+  
+services:
+  # crud:
+  #   build:
+  #     context: ../crud-inversify/
+  #     dockerfile: Dockerfile
+  #   # expose:
+  #   #   - "3001"
+  #   ports:
+  #     - 3001:3001
+  #   environment:
+  #     PORT: 3001
+  #     DB_PG: postgres://postgres:changeme@postgres:5432/postgres
+  #     URL_LOKI: http://loki:3100
+  #     EXPORTER: http://otel-collector:4318/v1/traces #http://otel-collector:9411
+  #   depends_on:
+  #     - loki
+  #   labels:
+  #     - "traefik.http.routers.crud.rule=Host(`crud.localhost`)"      
+  #   deploy:
+  #     mode: replicated
+  #     replicas: 1
+  #     resources:
+  #       limits:
+  #         cpus: '0.75'
+  #         memory: 250M
+  #       reservations:
+  #         cpus: '0.25'
+  #         memory: 150M
+  #     restart_policy:
+  #       condition: on-failure
+  #       delay: 5s
+  #       max_attempts: 3
+  #       window: 60s    
+  
+  loki:
+    image: grafana/loki:latest
+    ports:
+      - 3100:3100
+    command: -config.file=/etc/loki/local-config.yaml
+
+  # promtail:
+  #   image:  grafana/promtail:latest
+  #   container_name: promtail
+  #   volumes:
+  #     - ./config/promtail.yaml:/etc/promtail/docker-config.yaml
+  #     - /var/lib/docker/containers:/var/lib/docker/containers:ro
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   command: -config.file=/etc/promtail/docker-config.yaml
+  #   depends_on:
+  #     - loki
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"      
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - 3000:3000
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./config/grafana-datasources.yml:/etc/grafana/provisioning/datasources/datasources.yaml
+      - ./grafana/provisioning/:/etc/grafana/provisioning/
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+    depends_on:
+      - loki       
+
+  prometheus:
+    container_name: prometheus
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-changeme}
+      PGDATA: /data/postgres
+    volumes:
+       - postgres:/data/postgres
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+
+  # reverse-proxy:
+  #   # The official v2 Traefik docker image
+  #   image: traefik:v2.9
+  #   # Enables the web UI and tells Traefik to listen to docker
+  #   command: --api.insecure=true --providers.docker
+  #   ports:
+  #     # The HTTP port
+  #     - "80:80"
+  #     # The Web UI (enabled by --api.insecure=true)
+  #     - "8080:8080"
+  #   volumes:
+  #     # So that Traefik can listen to the Docker events
+  #     - /var/run/docker.sock:/var/run/docker.sock
+
+  # # And put them in a Grafana Agent pipeline...    
+  # k6-tracing:
+  #   image: ghcr.io/grafana/xk6-client-tracing:v0.0.2
+  #   environment:
+  #     - ENDPOINT=otel-collector:4317
+  #   restart: always
+  #   depends_on:
+  #     - otel-collector
+
+  otel-collector:
+    image: otel/opentelemetry-collector:0.61.0
+    command: [ "--config=/etc/otel-collector.yaml" ]
+    volumes:
+      - ./otel-collector.yaml:/etc/otel-collector.yaml
+    extra_hosts:
+      - "host.docker.internal:host-gateway"      
+
+  # tempo:
+  #   image: grafana/tempo:latest
+  #   command: [ "-config.file=/etc/tempo.yaml" ]
+  #   volumes:
+  #     - ../local/tempo-local.yaml:/etc/tempo.yaml
+  #     - ./tempo-data:/tmp/tempo
+  #   ports:
+  #     - "14268"  # jaeger ingest
+  #     - "3200"   # tempo
+  #     - "4317"  # otlp grpc
+  #     - "4318"  # otlp http
+  #     - "9411"   # zipkin 
+
+  #Zipkin
+  # zipkin:
+  #   image: openzipkin/zipkin
+  #   container_name: zipkin
+  #   ports:
+  #     - 9411:9411
+
+  jaeger-all-in-one:
+    image: jaegertracing/all-in-one  
+    ports:
+      - "6831:6831/udp"
+      - "6832:6832/udp"
+      - "5778:5778"
+      - "16686:16686"
+      - "4317:4317"
+      - "4318:4318"
+      - "14250:14250"
+      - "14268:14268"
+      - "14269:14269"
+      - "9411:9411"       

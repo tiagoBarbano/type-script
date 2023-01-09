@@ -1,7 +1,7 @@
-import createConnectionPool, {sql} from '@databases/pg';
+import createConnectionPool, { sql } from '@databases/pg';
 import dotenv from 'dotenv';
 
-export {sql};
+export { sql };
 
 dotenv.config();
 const url_db_pg = process.env.DB_PG;  
