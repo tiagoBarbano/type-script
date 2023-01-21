@@ -6,38 +6,39 @@ volumes:
   tempo-data: {}
   
 services:
-  # crud:
-  #   build:
-  #     context: ../crud-inversify/
-  #     dockerfile: Dockerfile
-  #   # expose:
-  #   #   - "3001"
-  #   ports:
-  #     - 3001:3001
-  #   environment:
-  #     PORT: 3001
-  #     DB_PG: postgres://postgres:changeme@postgres:5432/postgres
-  #     URL_LOKI: http://loki:3100
-  #     EXPORTER: http://otel-collector:4318/v1/traces #http://otel-collector:9411
-  #   depends_on:
-  #     - loki
-  #   labels:
-  #     - "traefik.http.routers.crud.rule=Host(`crud.localhost`)"      
-  #   deploy:
-  #     mode: replicated
-  #     replicas: 1
-  #     resources:
-  #       limits:
-  #         cpus: '0.75'
-  #         memory: 250M
-  #       reservations:
-  #         cpus: '0.25'
-  #         memory: 150M
-  #     restart_policy:
-  #       condition: on-failure
-  #       delay: 5s
-  #       max_attempts: 3
-  #       window: 60s    
+  crud:
+    build:
+      context: ../crud-inversify/
+      dockerfile: Dockerfile
+    # expose:
+    #   - "3001"
+    ports:
+      - 3001:3001
+    environment:
+      PORT: 3001
+      DB_PG: postgres://postgres:changeme@postgres:5432/postgres
+      URL_LOKI: http://loki:3100
+      EXPORTER: http://otel-collector:4318/v1/traces #http://otel-collector:9411
+      ENDPOINT_ZIPKIN: http://zipkin:9411/api/v1/spans
+    depends_on:
+      - loki
+    labels:
+      - "traefik.http.routers.crud.rule=Host(`crud.localhost`)"      
+    deploy:
+      mode: replicated
+      replicas: 1
+      resources:
+        limits:
+          cpus: '0.75'
+          memory: 250M
+        reservations:
+          cpus: '0.25'
+          memory: 150M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+        window: 60s    
   
   loki:
     image: grafana/loki:latest
@@ -118,13 +119,13 @@ services:
   #   depends_on:
   #     - otel-collector
 
-  otel-collector:
-    image: otel/opentelemetry-collector:0.61.0
-    command: [ "--config=/etc/otel-collector.yaml" ]
-    volumes:
-      - ./otel-collector.yaml:/etc/otel-collector.yaml
-    extra_hosts:
-      - "host.docker.internal:host-gateway"      
+  # otel-collector:
+  #   image: otel/opentelemetry-collector:0.61.0
+  #   command: [ "--config=/etc/otel-collector.yaml" ]
+  #   volumes:
+  #     - ./otel-collector.yaml:/etc/otel-collector.yaml
+  #   extra_hosts:
+  #     - "host.docker.internal:host-gateway"      
 
   # tempo:
   #   image: grafana/tempo:latest
@@ -140,22 +141,22 @@ services:
   #     - "9411"   # zipkin 
 
   #Zipkin
-  # zipkin:
-  #   image: openzipkin/zipkin
-  #   container_name: zipkin
-  #   ports:
-  #     - 9411:9411
-
-  jaeger-all-in-one:
-    image: jaegertracing/all-in-one  
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
     ports:
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "4317:4317"
-      - "4318:4318"
-      - "14250:14250"
-      - "14268:14268"
-      - "14269:14269"
-      - "9411:9411"       
+      - 9411:9411
+
+  # jaeger-all-in-one:
+  #   image: jaegertracing/all-in-one  
+  #   ports:
+  #     - "6831:6831/udp"
+  #     - "6832:6832/udp"
+  #     - "5778:5778"
+  #     - "16686:16686"
+  #     - "4317:4317"
+  #     - "4318:4318"
+  #     - "14250:14250"
+  #     - "14268:14268"
+  #     - "14269:14269"
+  #     - "9411:9411"       

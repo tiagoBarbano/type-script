@@ -9,7 +9,7 @@ const PORT = 3000;
 
 if (clusterWorkerSize > 1) {
 	if (cluster.isMaster) {
-	  for (let i=0; i < clusterWorkerSize; i++) {
+	  for (let i=2; i < clusterWorkerSize; i++) {
 		cluster.fork()
 	  }
   

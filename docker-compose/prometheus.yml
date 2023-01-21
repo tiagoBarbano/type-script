@@ -9,7 +9,7 @@ global:
 scrape_configs:
   - job_name: 'crud'
     static_configs:
-      - targets: ['host.docker.internal:3001']
+      - targets: ['crud:3001']
   # - job_name: 'crud'
   #   dns_sd_configs:
   #     - names: ["host.docker.internal"]
